@@ -1,0 +1,10 @@
+[package]
+name = "framework-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+thiserror = "~1"
+futures-concurrency = "~7"
+futures-lite = "~2"
+tokio = { version = "~1", features = ["rt"] }

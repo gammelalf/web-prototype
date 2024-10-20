@@ -1,0 +1,8 @@
+[package]
+name = "framework-db"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+framework-core = { path = "../framework-core" }
+rorm = { version = "~0.6", features = ["tokio"] }
