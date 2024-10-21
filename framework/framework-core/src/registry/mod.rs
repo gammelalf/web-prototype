@@ -1,5 +1,6 @@
 pub use self::dependencies::ModuleDependencies;
 use crate::module;
+use crate::module::Module;
 use crate::registry::builder::RegistryBuilder;
 use crate::registry::module_set::LeakedModuleSet;
 use std::any::Any;
@@ -37,6 +38,10 @@ impl Registry {
 
     pub fn try_global() -> Option<&'static Self> {
         Self::raw_global().get()
+    }
+
+    pub fn try_get<T: Module>(&self) -> Option<&T> {
+        self.modules.get()
     }
 
     fn raw_global() -> &'static OnceLock<Self> {
