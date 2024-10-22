@@ -15,12 +15,16 @@ pub struct RegistryBuilder {
 }
 
 impl RegistryBuilder {
+    /// Constructs a new `RegistryBuilder`
     pub fn new() -> Self {
         Self {
             modules: HashMap::new(),
         }
     }
 
+    /// Adds a new module to the `RegistryBuilder`
+    ///
+    /// Calling this method twice with the same `T` is not an error but will only add it once.
     pub fn register_module<T: Module>(&mut self) -> &mut Self {
         if let Entry::Vacant(entry) = self.modules.entry(TypeId::of::<T>()) {
             entry.insert(Box::new(|| {
@@ -46,6 +50,9 @@ impl RegistryBuilder {
         self
     }
 
+    /// Initialized all registered modules
+    ///
+    /// and makes the registry available through [`Registry::global`].
     pub async fn init(&mut self) -> Result<(), InitError> {
         let pre_init_modules = process_join_results(
             self.modules
@@ -102,8 +109,10 @@ pub enum InitError {
     PostInit(Vec<module::PostInitError>),
 }
 
+/// An uninitialised module waiting to be pre-initialised
 type UninitModule = Box<dyn Fn() -> JoinHandle<Result<PreInitModule, module::PreInitError>>>;
 
+/// A pre-initialised modules waiting to be initialised
 type PreInitModule =
     BoxDynFnOnce<OwnedModulesSet, future::Boxed<Result<OwnedModulesSet, module::InitError>>>;
 
@@ -113,8 +122,10 @@ impl<M: Module> DynModule for M {
     }
 }
 
+/// Helper mimicking a `Box<dyn FnOnce>` which doesn't exist because `FnOnce` isn't object safe.
 struct BoxDynFnOnce<Arg, Ret>(Box<dyn FnMut(Arg) -> Ret + Send>);
 impl<Arg: 'static, Ret: 'static> BoxDynFnOnce<Arg, Ret> {
+    /// Constructs a new `BoxDynFnOnce`
     pub fn new(f: impl FnOnce(Arg) -> Ret + Send + 'static) -> Self {
         let mut f = Some(f);
         Self(Box::new(move |arg| {
@@ -125,6 +136,7 @@ impl<Arg: 'static, Ret: 'static> BoxDynFnOnce<Arg, Ret> {
         }))
     }
 
+    /// Calls the contained `FnOnce`
     pub fn call(mut self, arg: Arg) -> Ret {
         (self.0)(arg)
     }

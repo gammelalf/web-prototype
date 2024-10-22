@@ -1,4 +1,5 @@
-use framework::db::Db;
+use framework::core::module::Module;
+use framework::db::module::Db;
 
 #[tokio::main]
 async fn main() {
@@ -7,4 +8,6 @@ async fn main() {
         .init()
         .await
         .unwrap();
+
+    let _db = Db::global();
 }
